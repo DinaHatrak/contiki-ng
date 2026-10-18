@@ -1,5 +1,4 @@
-
-name: RPL Research - Cooja Check
+name: RPL Final - Guard v2 and Blackhole
 
 on:
   workflow_dispatch:
@@ -7,61 +6,187 @@ on:
 permissions:
   contents: read
 
-jobs:
-  cooja-check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+concurrency:
+  group: rpl-guard-v2-validation
+  cancel-in-progress: false
 
+env:
+  RPL_RUNNER_Z: "eNqtGX9T27jyf38K1Z07bAgG0lfuDpq+CSGFvAPCJNB7b1pG49hKouLYHssOZO747m9Xsmw5BHp3c5kOlVe7q9X+0q5k2/aYx7OI7bI4z1YtIpIiC9huxkSeZDBDzgo/C8myTfbIJPKD+3kSMZKxNOKBn/MkJuwxZ7GAkWeNipgkcbQiPCb5nMFUmmQ5CwFfMD8L5mSS+XEwb5EHns/JtIii3TnHlVYkmLPgPilyzzqXEGAfkcBfpD6fxQI4LHzgWsR5UgBq6Fm2bVt8gQuQuS/mEZ/oz0RY0yxZkNTPEUxK8DV8apSM6ZEoJmmWBEyICrKqho+LyGN5xpjXj9gCVHQDY+IL0r+xKlZpREVehCuEy4FlnXTH/YvBVZ9e9Qdn5/TkYnhCOsT23x/8Mj38eRK8D4LgJ/aLP30XsvZP7f3JwfT9ZHrgT/fZv96/P7St28H1IVBIdt5oOLwB9duJ2ItZvsfT5eFewdNDL7AthTEe3o56/TFQONsNSIsgJ7dEuxyeKiR74gsW8ZjZLWLnRcxCHMzQ1I0hXbZt13pLukRILyEiYLGf8YSkLAMrhyxl8CfOSTdAZxDkWzI5JjFbwnQCfx4ynjOSRCHpjT8Lzxr3+lfd0WAIQiTCY/GSZ+A4M5Y79uj6guppFKHyNpCAT0lFGSc5+tfvNrjSPQU5BPgLiNCkgQ81X0SC0Yd3+wiJ2IznfOHnjAZzP54x++nIIvDLfC4YGa+A0aL/yEGaQbz0Ix4SU6ojYpOdShCtVP0tFas/WnoWtr1uR8dGl5ny2I+oyRCGjk1THiW5TWDH9u6u/ojRKT0/my0Jg/0Q23YB2/YCsbT1Sv3R6C+sZFOWZUnmRcms4vBp0L84NZ1IAUy90jBLUoG6XLYpAEI9DpJ4yrOFTAkaBhGTzVgccCZgDetzmyqvhBWyra2tvW1ydj2mZ7fd0Sk96Z8Nro4wY7CMY6RB9Puhn+Z8yYjJnHxuk+09623IYF9McgDGn7rjG9q/+S85+KW9Pvdbv/srHV6cyvn2+8P1+bPu4GoTXPL8rTu4Ie399bnxxfA3NXe4ae5mTA4OLStfpQzmwChZEeTkd/A1NEg8yWhOtgM/DnkIzngM8CBKgnsKzslgSuR+lh9bT2SWCghBmrEgyUIKIJjJebAOb36LL6Ygd8eWplom4NAVqoCgQ4hroVwFpPAZ5AHwNQgvlGiaZA4HU+0fE04+NDYHkJ0dV+6HrK/N77xqY0B9dXtxgdyerCfLMjavxozP5pMko5CMWJDTCZw6hkwGOs6g27xARDGfOe7xmoKLLMPc1CE4ojwGPcQB80J/5qUZm0IEQIpLfURC0nWtbquRsYsCtHNwCFNyUZY/tjC34UAvLZNOOY9jhYAjTf+ujQaDw+x4o9obkAef57BP8P9QgB0JpAVHqULJRP74g1S7rEEapZx6Zik0vVQWyMzyIoslhTKTXOONHwQszf0JRDzK7jQUL/e45D7q2dFruLCw5EjeNJC5oAYzpeyK6GWaKUg5N5i/vIOL4RkdXH0aOnbpov3L/uisf9X739fYfmmX8EebcN2t4DCicDTe0wWc/DyQ+pZsSkt/D1/LfKzXQHWtEzVU2Fjhu9gmf3QjPEo13UdjxX8TR7ubWyHsGghHENrAw/QxzP2VXj50nmXXH39U5mr8tF4+djZm3I00UvCaAFOwCxI/y7xHzxKuDIM/m5vAlV9NTx2pDo2NflIG/I/PyI5LlEnG/Hv18VQHjCZUMagZwgnXhWLogdRLytQuiE+kg7fqmV2RsoBPIU2HDyyKMPxZBjWIh6fdy9H7grz7dybC7kczJesoqGelUJgmq0PoxeA6B7OWLtP5ocDNoe1xWLoBDtG6nR+iAgKw1TS+6WwtcNAy2bl1Pq1hJcM1DtU8iZJ45uJSzSAv48PIZo55uLqOuUsIiIYSXPJBLbdG0wiSbdK7GPZ+peN+b3h1WiWnzes/0yDQfBqMLr+nxHXd/Q3NuY1DrXKbRjJ8shplWP/qFPwNijPLsrBygXqZ6l7BwX7KLQtmFoG/IMCDoY9VGs0Tp64+Xc8XNE0Ef3RcSaEaS6xQq4bLkz0fhaYvLXLniw2LYeUo5skD/g894IzHeyE0E1GSHmEBC2vdQcw8hB1jpTLSpTQYgWpKdl5HlQZTfxUlPobKBKrZZCJLeajLnIjFjpLNdaEhCZIQ3WIH0L7uSxw5V/ERcx94lA2nB18HTsna9ebsMeQzrGHcCh/kQpI3HbKhJzxquLZqQqCHRqfrY3Xu2Cel7gmobAmtF5QvZMEFlMLBXLUjwN013a+U1yprejSgUqSPFjPtaSEcTmRgRRfZPJlW7YMBK/3AgDgLUJG+KBClP6yzcqpmEjWAFGgZs61UjUyTl7bkJvxaV4GcNc0MPuhDwcYeTc1PMKEBqodt6qNjP2837BqZvYasgkK2XOgtmydrDzHkku2vEgy5fzma3AGTuhHakYt+YUd3bmWxpkFMUxhK5sEiXTMXghrWQoCjG/ZXDCbxnnXT0nN1t4+2qHtrZbrnnCXjgkvBFOgL3j7ceSFTYaXt+wLf2sQLP7tnGV6Z6Chy3gBjqhLGIi8cLB2JhBUpnms0zyMHU7Fthh7Me0ECEeUoji4GYvv7YTe4Xh6S29NrLDQewAXxImyeJPdV7Bn25vE3Ji8/yrZWQcFH+mYvu/AjHvCkECQGVRwZd2k5aF7wHJfAFfH+rDrz5c6RgHJZXLyDaqo8pcujABQBZdS7w/1GnQVqp/Dv5PbT7kfIHLnUNAKvR8ObIYV16poHcmMGxcZUHVAn5/R0NKw2DrFXhGldSMtCBPnhPYAGPVl4YOhp5QCoebwl9ANW6r5laGqHaNiB+wrh1lseB1EB4W6LldiLkpk3t7daG+pJ/dtI8TVuQlGhuzzcMCNV24R/EHnIE2/+casSFp3aDG0QeT18y/g0IlMG3MK/Z1TwRRW6GlAGrv40wla6rxm0L+JIFLysBO79GxAkg564vKMaXJaHRBHHMrBiFDxFM5NUXtfiJecUsp8fRY7t7e2lUQGHBiQ9vIkaBxlP85EkltdRTurh1kEivItSvGOVl9USkpdkJCRtGTDfsMVAREkuQXghnMhYX/oZwTslLOxb+tKHyc9jW+eOb6KMaEUnI/qgjuhN0dxLkm8++c9Y6UkvqG4AQ1Mw4K1dTyG1NPIOAZ9A+SbzU7wB6+y3lu1zvP+So56WVX71y3uvVQfkrrym2ueWXe+tY8szQO8Ul5HBtvVPbFcUCwiz1V/b8OvSybhPy5lSFxK+bKPlJLhUTAkuycuZXoPZss0qVan5SnWGKjZoUObFhZip43qocteR0WZVQtsyP+67X2NVOpTgnZ1/RsWQYGaYuf+eT6m0CVsxsvv6rjZnZL0tbQPYj7VRKbpnqwhK67xKULYoBk3PUNzLdNXNi0FZWRRVvlUbs0oCUkdV7lJ5tU5bLSJrctBxxy7y6e7PEFCPi4hCSRH5mbwR7txkBasTsJFjq+yqEifzRZHVpWP5rVOv+oI6Lcb6p1UVKVXHU7baJq8N2BIZF8+Ypx69nEzqZ3x7SbztKoCcr+GOq8NGf+hg0d91eEiILbMiLliVUvgasnjdWS+5wNcb9VAH/kOU90qfh3qvdFZ5sd+S+VdUyRdGxiW+1GjqcNzvwptlSZFC/eEa6vFUMeasvRd0Sub6zaCjVtlwjq+/JHRqQZoPCh1jXCpDiELKWIoiH5XkLUoKrZFkR6eRP8PW0v5eKQoxGiqV4MS+oWDJ/MtGxnd4fVaKAenruNYCWImyR5YFYB3IDh40nhxq7uM/J4de089zgFMoR6D6YzENIo6V+t2aiH9DEX91Z1U1q64mcXtAzvhy0+7KxlTxr8O0isYqDkENlMb+glEq1UApvvlSWjYGskx17PHN7en/6Mmoe9U7p+PzLmzju1cKGVvuynoIP8773VP7+TVC1aWU8rstMo0KMS/TiylB/UpZvfcRWz6uojD1UytAh7c317c3Fbg3/uzhDp/z1smLx2Wf9JacVD0CF0Q9R6rX9al8Xa9bCtkR+0FeQPG20hkGis/gnuXC0y5Wv72+0HWVD9qBWFYg+U5fi56k0P/G7AGvDzr4COkLMl1rp5IH9L0I2kgHOHmnPMhH0J6zzJm6jXsRTF1+vMJ84gDVl2evjHdwipB9WaPCPJadyNzd1L41nm6vPncvBqfk5KLb+xXOvv4RLFUfn7LLKnWjdeWREQsZ3p6RPEkTONVXZMKAhJFmOHh2wxN6w8vri/5N37Rv07T/B2aVgxY="
+
+jobs:
+  pilot:
+    name: Pilot - compile and verify 4 policies
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
-      - name: Restore research branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: codespace-reimagined-invention-977xg5wq6vxjh99vv
+          fetch-depth: 0
           submodules: recursive
-
-      - name: Install Java
-        uses: actions/setup-java@v4
+          persist-credentials: false
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Install dependencies
+      - name: Install Contiki-NG prerequisites
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential make python3
-
-      - name: Verify research files
+      - name: Restore auditable Python study runner
         run: |
-          test -f rpl_study.py
+          python3 -c 'import os,zlib,base64,pathlib; pathlib.Path("rpl_guard_v2_runner.py").write_bytes(zlib.decompress(base64.b64decode(os.environ["RPL_RUNNER_Z"])))'
+          python3 -m py_compile rpl_guard_v2_runner.py rpl_study.py
           test -f rpl_campaign_v2.csv
-          python3 - <<'PY'
-          import csv
-          with open("rpl_campaign_v2.csv", newline="") as f:
-              rows = list(csv.DictReader(f))
-          assert len(rows) == 210, len(rows)
-          print("210 historical simulations preserved")
-          PY
-
-      - name: Test Cooja simulation
+          test "$(wc -l < rpl_campaign_v2.csv)" -eq 211
+          git show origin/develop:os/net/routing/rpl-lite/rpl-neighbor.c >/tmp/rpl_neighbor_original.c
+          sha256sum /tmp/rpl_neighbor_original.c
+      - name: Small pilot on all four scenarios and four policies
         run: |
-          mkdir -p "$RUNNER_TEMP/rpl-smoke"
-          chmod +x tools/cooja/gradlew
-
-          tools/cooja/gradlew \
-            --no-watch-fs \
-            --no-daemon \
-            -p tools/cooja \
-            run \
-            --args="--no-gui --contiki=$GITHUB_WORKSPACE --logdir=$RUNNER_TEMP/rpl-smoke --random-seed=1 $GITHUB_WORKSPACE/tests/14-rpl-lite/01-rpl-up-route.csc"
-
-          cat "$RUNNER_TEMP/rpl-smoke/COOJA.testlog"
-          grep -q "TEST OK" "$RUNNER_TEMP/rpl-smoke/COOJA.testlog"
-
-      - name: Save simulation log
+          set -euo pipefail
+          for scenario in rank_persistent blackhole rank_pulse_w30 legitimate_change; do
+            echo "PILOT scenario=$scenario"
+            RPL_SCENARIO="$scenario" python3 rpl_guard_v2_runner.py --pilot
+          done
+      - name: Preserve pilot data and failure logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rpl-cooja-smoke-log
+          name: rpl-v2-pilot
           path: |
-            ${{ runner.temp }}/rpl-smoke/
+            rpl_guard_v2_runner.py
+            rpl_final_*_pilot.csv
+            rpl_final_*_error.log
+            tests/14-rpl-lite/COOJA.testlog
+          if-no-files-found: warn
+
+  full:
+    name: New study - ${{ matrix.scenario }}
+    needs: pilot
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [rank_persistent, blackhole, rank_pulse_w30, legitimate_change]
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codespace-reimagined-invention-977xg5wq6vxjh99vv
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Contiki-NG prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential make python3
+      - name: Restore identical study runner
+        run: |
+          python3 -c 'import os,zlib,base64,pathlib; pathlib.Path("rpl_guard_v2_runner.py").write_bytes(zlib.decompress(base64.b64decode(os.environ["RPL_RUNNER_Z"])))'
+          python3 -m py_compile rpl_guard_v2_runner.py rpl_study.py
+      - name: Execute 40 new paired simulations
+        env:
+          RPL_SCENARIO: ${{ matrix.scenario }}
+        run: |
+          python3 rpl_guard_v2_runner.py --seeds 5
+      - name: Save completed rows, script, and error logs even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpl-v2-${{ matrix.scenario }}
+          path: |
+            rpl_final_*.csv
+            rpl_final_*_error.log
+            rpl_guard_v2_runner.py
+            tests/14-rpl-lite/COOJA.testlog
+          if-no-files-found: warn
+
+  summary:
+    name: Consolidate and validate every simulation
+    if: always()
+    needs: [pilot, full]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: rpl-v2-*
+          path: gathered
+          merge-multiple: false
+      - name: Summarize without inventing conclusions
+        run: |
+          python3 - <<'PY_SUM'
+          import csv, pathlib, statistics, collections
+          base=pathlib.Path('gathered')
+          paths=sorted(base.glob('rpl-v2-*/rpl_final_*.csv'))
+          paths=[p for p in paths if not p.name.endswith('_pilot.csv')]
+          rows=[]
+          for p in paths:
+              with p.open(newline='') as f:
+                  rows.extend(csv.DictReader(f))
+          out=pathlib.Path('rpl_v2_analysis')
+          out.mkdir(exist_ok=True)
+          with (out/'all_results.csv').open('w',newline='') as f:
+              if rows:
+                  w=csv.DictWriter(f,fieldnames=list(rows[0]))
+                  w.writeheader()
+                  w.writerows(rows)
+          modes=('baseline','tuned','guarded','guarded_v2')
+          cases=('rank_persistent','blackhole','rank_pulse_w30','legitimate_change')
+          groups=collections.defaultdict(list)
+          for r in rows:
+              groups[(r['scenario'],r['mode'])].append(r)
+          summary=[]
+          for scenario in cases:
+              for mode in modes:
+                  subset=groups[(scenario,mode)]
+                  def avg(key):
+                      vals=[float(r[key]) for r in subset if r.get(key) not in ('',None)]
+                      return round(statistics.mean(vals),5) if vals else ''
+                  summary.append(dict(scenario=scenario,mode=mode,n=len(subset),
+                      pdr=avg('event_pdr'),switches=avg('all_switches_after_event'),
+                      client_switches=avg('client_switches_after_event'),
+                      first_client_switch_delay_s=avg('first_client_switch_delay_s'),
+                      malicious_dio_seen=avg('attack_dio_seen_client'),
+                      blackhole_drops=avg('blackhole_drops')))
+          with (out/'summary.csv').open('w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=list(summary[0]))
+              w.writeheader(); w.writerows(summary)
+          keys=[(r['mode'],r['scenario'],r['nodes'],r['seed']) for r in rows]
+          invalid=[]
+          if len(keys)!=len(set(keys)): invalid.append('Duplicate combinations')
+          if len(rows)!=160: invalid.append('Incomplete results: expected 160, got '+str(len(rows)))
+          for r in rows:
+              if r['event_pdr'] and not 0<=float(r['event_pdr'])<=1:
+                  invalid.append('PDR outside [0,1]')
+              if int(r['event_received'])>int(r['event_sent']):
+                  invalid.append('Received more than sent')
+          bh=[r for r in rows if r['scenario']=='blackhole']
+          if bh and not any(int(r['blackhole_drops'])>0 for r in bh):
+              invalid.append('Blackhole never forwarded/dropped UDP')
+          caveats=[
+            'First client switch delay is NOT verified recovery time.',
+            'Attacker DIO counts may differ by policy; compare exposure.',
+            'Measured ETX is not authentication and cannot by itself detect blackholes.',
+            'The conservative MRHOF parameters are a fixed comparator, not independently optimized.',
+            'Only five fixed seeds and one geometry per topology; uncertainty is limited.',
+            'Do not claim Guard v2 superiority before inspecting paired results and source logs.',
+          ]
+          report=(f'Executed {len(rows)} of 160 planned new simulations.\n'
+            + ('Quality checks PASSED.\n' if not invalid else 'QUALITY FAILURE: '+ '; '.join(sorted(set(invalid)))+'\n')
+            + '\n'.join(caveats)+'\n')
+          (out/'quality_report.txt').write_text(report)
+          print(report)
+          for r in summary: print(r)
+          if invalid: raise SystemExit('Result integrity checks failed')
+          PY_SUM
+      - name: Preserve consolidated evidence and quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpl-v2-consolidated-results
+          path: rpl_v2_analysis/
           if-no-files-found: warn
