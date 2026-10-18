@@ -1,0 +1,67 @@
+
+name: RPL Research - Cooja Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cooja-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Restore research branch
+        uses: actions/checkout@v4
+        with:
+          ref: codespace-reimagined-invention-977xg5wq6vxjh99vv
+          submodules: recursive
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential make python3
+
+      - name: Verify research files
+        run: |
+          test -f rpl_study.py
+          test -f rpl_campaign_v2.csv
+          python3 - <<'PY'
+          import csv
+          with open("rpl_campaign_v2.csv", newline="") as f:
+              rows = list(csv.DictReader(f))
+          assert len(rows) == 210, len(rows)
+          print("210 historical simulations preserved")
+          PY
+
+      - name: Test Cooja simulation
+        run: |
+          mkdir -p "$RUNNER_TEMP/rpl-smoke"
+          chmod +x tools/cooja/gradlew
+
+          tools/cooja/gradlew \
+            --no-watch-fs \
+            --no-daemon \
+            -p tools/cooja \
+            run \
+            --args="--no-gui --contiki=$GITHUB_WORKSPACE --logdir=$RUNNER_TEMP/rpl-smoke --random-seed=1 $GITHUB_WORKSPACE/tests/14-rpl-lite/01-rpl-up-route.csc"
+
+          cat "$RUNNER_TEMP/rpl-smoke/COOJA.testlog"
+          grep -q "TEST OK" "$RUNNER_TEMP/rpl-smoke/COOJA.testlog"
+
+      - name: Save simulation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpl-cooja-smoke-log
+          path: |
+            ${{ runner.temp }}/rpl-smoke/
+          if-no-files-found: warn
