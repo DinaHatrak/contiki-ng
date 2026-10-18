@@ -373,8 +373,8 @@ best_parent(int fresh_only)
   return best;
 }
 /*---------------------------------------------------------------------------*/
-rpl_nbr_t *
-rpl_neighbor_select_best(void)
+static rpl_nbr_t *
+rpl_neighbor_select_best_base(void)
 {
   rpl_nbr_t *best;
 
@@ -436,6 +436,65 @@ rpl_neighbor_select_best(void)
   return best;
 #endif /* RPL_WITH_PROBING */
 }
+
+/* GPS_GUARD_BEGIN: confirmation before parent switching. */
+#ifndef RPL_GUARD_ENABLED
+#define RPL_GUARD_ENABLED 1
+#endif
+
+#ifndef RPL_GUARD_SECONDS
+#define RPL_GUARD_SECONDS 60
+#endif
+
+#if RPL_GUARD_ENABLED
+static rpl_nbr_t *guard_candidate;
+static clock_time_t guard_since;
+#endif
+
+rpl_nbr_t *
+rpl_neighbor_select_best(void)
+{
+  rpl_nbr_t *best = rpl_neighbor_select_best_base();
+
+#if RPL_GUARD_ENABLED
+  rpl_nbr_t *current = curr_instance.dag.preferred_parent;
+
+  /* Allow initial joining and emergency recovery. */
+  if(best == NULL || current == NULL || best == current) {
+    guard_candidate = NULL;
+    return best;
+  }
+
+  /* Never hold a parent that is no longer usable. */
+  if(!acceptable_rank(rpl_neighbor_rank_via_nbr(current)) ||
+     !rpl_neighbor_is_acceptable_parent(current) ||
+     !rpl_neighbor_is_fresh(current)) {
+    guard_candidate = NULL;
+    return best;
+  }
+
+  /* Require the same challenger over a confirmation period. */
+  if(guard_candidate != best) {
+    guard_candidate = best;
+    guard_since = clock_time();
+    LOG_INFO("GPS: candidate under confirmation\n");
+    return current;
+  }
+
+  if((clock_time_t)(clock_time() - guard_since)
+      < RPL_GUARD_SECONDS * CLOCK_SECOND) {
+    return current;
+  }
+
+  guard_candidate = NULL;
+  LOG_INFO("GPS: candidate confirmed\n");
+#endif
+
+  return best;
+}
+/* GPS_GUARD_END */
+/*---------------------------------------------------------------------------*/
+
 /*---------------------------------------------------------------------------*/
 void
 rpl_neighbor_init(void)
