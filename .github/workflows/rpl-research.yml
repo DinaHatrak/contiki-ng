@@ -44,10 +44,37 @@ jobs:
       - name: Small pilot on all four scenarios and four policies
         run: |
           set -euo pipefail
-          for scenario in rank_persistent blackhole rank_pulse_w30 legitimate_change; do
+          for scenario in rank_persistent rank_pulse_w30 legitimate_change; do
             echo "PILOT scenario=$scenario"
             RPL_SCENARIO="$scenario" python3 rpl_guard_v2_runner.py --pilot
           done
+          # Two predeclared single-compromised-relay layouts; accept only if
+          # forwarded IPv6 is dropped and baseline application PDR declines.
+          for compromised in 3 5; do
+            echo "BLACKHOLE PILOT compromised_relay=$compromised"
+            rm -f rpl_final_blackhole_pilot.csv
+            if RPL_BH_NODE="$compromised" RPL_SCENARIO=blackhole python3 rpl_guard_v2_runner.py --pilot; then
+              if python3 - <<'PY_CHECK'
+          import csv,sys
+          with open('rpl_final_blackhole_pilot.csv',newline='') as f:
+              rows=list(csv.DictReader(f))
+          baseline=next(r for r in rows if r['mode']=='baseline')
+          drops=sum(int(r['blackhole_drops']) for r in rows)
+          data_loss=float(baseline['event_pdr'])<1.0
+          print(f'Blackhole exposure: all drops={drops}, baseline event PDR={baseline["event_pdr"]}')
+          sys.exit(0 if drops>0 and data_loss else 1)
+          PY_CHECK
+              then
+                echo "$compromised" > blackhole_node.txt
+                break
+              fi
+            fi
+            if [ -f rpl_final_blackhole_pilot.csv ]; then
+              mv rpl_final_blackhole_pilot.csv "rpl_blackhole_rejected_node_${compromised}.csv"
+            fi
+          done
+          test -s blackhole_node.txt || { echo 'Neither layout demonstrated baseline data loss'; exit 1; }
+          echo "VALIDATED BLACKHOLE RELAY $(cat blackhole_node.txt)"
       - name: Preserve pilot data and failure logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -56,6 +83,8 @@ jobs:
           path: |
             rpl_guard_v2_runner.py
             rpl_final_*_pilot.csv
+            rpl_blackhole_rejected_node_*.csv
+            blackhole_node.txt
             rpl_final_*_error.log
             tests/14-rpl-lite/COOJA.testlog
           if-no-files-found: warn
@@ -88,10 +117,18 @@ jobs:
         run: |
           python3 -c 'import os,zlib,base64,pathlib; pathlib.Path("rpl_guard_v2_runner.py").write_bytes(zlib.decompress(base64.b64decode(os.environ["RPL_RUNNER_Z"])))'
           python3 -m py_compile rpl_guard_v2_runner.py rpl_study.py
+      - name: Read validated blackhole configuration
+        uses: actions/download-artifact@v4
+        with:
+          name: rpl-v2-pilot
+          path: pilot_artifact
       - name: Execute 40 new paired simulations
         env:
           RPL_SCENARIO: ${{ matrix.scenario }}
         run: |
+          test -s pilot_artifact/blackhole_node.txt
+          export RPL_BH_NODE="$(cat pilot_artifact/blackhole_node.txt)"
+          echo "Using prevalidated compromised relay $RPL_BH_NODE"
           python3 rpl_guard_v2_runner.py --seeds 5
       - name: Save completed rows, script, and error logs even on failure
         if: always()
